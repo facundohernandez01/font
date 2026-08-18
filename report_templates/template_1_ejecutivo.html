@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Ejecutivo — ArcelorMittal</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+  <style>
+    /* ============================================================
+     TIPOGRAFÍA DE MARCA — Gilroy (Regular + SemiBold únicamente)
+     Reemplazar las URLs por el host público real de los .woff2.
+     Nunca usar base64: infla el peso del documento innecesariamente.
+     Fallback obligatorio: Arial (tipografía de sistema ArcelorMittal).
+  ============================================================ */
+    @font-face {
+      font-family: "Gilroy";
+      src: url("https://TU-HOST-PUBLICO/fonts/GilroyW05-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Gilroy";
+      src: url("https://raw.githubusercontent.com/facundohernandez01/font/main/GilroyW05-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: italic;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Gilroy";
+      src: url("https://raw.githubusercontent.com/facundohernandez01/font/main/GilroyW05-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Gilroy";
+      src: url("https://raw.githubusercontent.com/facundohernandez01/font/main/GilroyW05-SemiBoldItalic.woff2") format("woff2");
+      font-weight: 600;
+      font-style: italic;
+      font-display: swap;
+    }
+
+    :root {
+      /* Colores de marca (UI / texto / fondos) — Manual "Colour" */
+      --steel: #414141;
+      /* Dark steel grey — wordmark, texto */
+      --orange: #ff3700;
+      /* Hot orange — acento, nunca bloques grandes */
+      --sky: #0072ce;
+      /* Sky blue — acento secundario */
+      --white: #ffffff;
+      --page: #f5f5f6;
+      --line: #e3e5e7;
+      --muted: #7a7d80;
+
+      /* Gradiente de marca — amarillo → naranja → rojo → púrpura */
+      /* --gradient: linear-gradient(115deg, #ffbe6e 0%, #ff3700 32%, #d63c41 52%, #be2878 74%, #460a78 100%); */
+      --gradient: linear-gradient(115deg, #460a78 0%, #be2878 32%, #d63c41 52%, #ff3700 74%, #ffbe6e 100%);
+
+      /* Paleta EXCLUSIVA para gráficos — Manual "Charts and diagrams" */
+      --c-purple: #460a78;
+      --c-violet: #be2878;
+      --c-red: #e63c41;
+      --c-orange: #f58746;
+      --c-yellow: #ffbe6e;
+
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(65, 65, 65, .08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--steel);
+      font-family: "Gilroy", Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Regla tipográfica de marca: SIEMPRE alineado a la izquierda */
+    h1,
+    h2,
+    h3,
+    h4,
+    p,
+    span,
+    td,
+    th,
+    li {
+      text-align: left;
+    }
+
+    button,
+    select {
+      font-family: inherit;
+    }
+
+    /* ---------- Header ---------- */
+    .topline {
+      height: 6px;
+      background: var(--gradient);
+    }
+
+    header.app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px 32px;
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo svg {
+      width: 150px;
+      height: auto;
+      display: block;
+    }
+
+    .brand-mark .divider {
+      width: 1px;
+      height: 34px;
+      background: var(--line);
+    }
+
+    .brand-mark .title {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--steel);
+      letter-spacing: .2px;
+    }
+
+    .brand-mark .title small {
+      display: block;
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill-date {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--page);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 14px;
+    }
+
+    /* ---------- Hero con shape de marca ---------- */
+    .hero {
+      position: relative;
+      margin: 22px 32px 0;
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--steel);
+      min-height: 150px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Graphic shape: forma angular con el gradiente, naranja dominante,
+     púrpura en la esquina — según manual "Graphic shapes" */
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--gradient);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -90px;
+      width: 260px;
+      height: 260px;
+      border: 0px solid rgba(255, 255, 255, .18);
+      border-radius: 46% 54% 60% 40%;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      padding: 30px 40px;
+      max-width: 640px;
+    }
+
+    .hero-copy .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, .85);
+      margin: 0 0 8px;
+    }
+
+    .hero-copy h1 {
+      margin: 0;
+      color: var(--white);
+      font-weight: 600;
+      font-size: clamp(22px, 2.6vw, 32px);
+      letter-spacing: -.5px;
+    }
+
+    .hero-copy p {
+      margin: 10px 0 0;
+      color: rgba(255, 255, 255, .85);
+      font-size: 13.5px;
+      max-width: 480px;
+    }
+
+    /* ---------- Shell ---------- */
+    .shell {
+      padding: 22px 32px 48px;
+    }
+
+    /* ---------- Tabs ---------- */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab-btn {
+      appearance: none;
+      border: 0;
+      background: none;
+      cursor: pointer;
+      padding: 11px 4px;
+      margin-right: 22px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      transition: color .15s ease, border-color .15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--steel);
+    }
+
+    .tab-btn.active {
+      color: var(--steel);
+      border-color: var(--orange);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn .25s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* ---------- Toolbar de filtros ---------- */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: end;
+      justify-content: space-between;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 190px;
+    }
+
+    .field label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    select {
+      height: 40px;
+      padding: 0 34px 0 12px;
+      border: 1px solid #cfd2d5;
+      border-radius: 9px;
+      background: var(--white) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%23777"/></svg>') no-repeat right 12px center;
+      appearance: none;
+      color: var(--steel);
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--sky);
+      box-shadow: 0 0 0 3px rgba(0, 114, 206, .14);
+    }
+
+    .btn-reset {
+      height: 40px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--white);
+      color: var(--steel);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color .15s ease, color .15s ease;
+    }
+
+    .btn-reset:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .active-scope {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .active-scope strong {
+      display: block;
+      font-size: 15px;
+      color: var(--steel);
+      margin-top: 2px;
+    }
+
+    .active-scope strong .accent {
+      color: var(--orange);
+    }
+
+    /* ---------- KPI cards ---------- */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .kpi {
+      position: relative;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+      overflow: hidden;
+    }
+
+    .kpi::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--orange);
+    }
+
+    .kpi.sky::before {
+      background: var(--sky);
+    }
+
+    .kpi.steel::before {
+      background: var(--steel);
+    }
+
+    .kpi.grad::before {
+      background: var(--gradient);
+    }
+
+    .kpi .label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 10px;
+    }
+
+    .kpi .value {
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: -.6px;
+    }
+
+    .kpi .delta {
+      margin-top: 8px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .kpi .delta.up {
+      color: #1b8a5a;
+    }
+
+    .kpi .delta.up::before {
+      content: "▲ ";
+      font-size: 10px;
+    }
+
+    .kpi .delta.down {
+      color: var(--orange);
+    }
+
+    .kpi .delta.down::before {
+      content: "▼ ";
+      font-size: 10px;
+    }
+
+    /* ---------- Cards / grillas de charts ---------- */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 18px 20px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .card-head h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .card-head p {
+      margin: 4px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .badge {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 999px;
+      color: var(--sky);
+      background: rgba(0, 114, 206, .08);
+      white-space: nowrap;
+    }
+
+    .badge.orange {
+      color: var(--orange);
+      background: rgba(255, 55, 0, .08);
+    }
+
+    .chart {
+      height: 330px;
+      padding: 6px 10px 16px;
+    }
+
+    .chart.tall {
+      height: 400px;
+    }
+
+    .chart.short {
+      height: 230px;
+    }
+
+    /* ---------- Tabla ---------- */
+    .table-wrap {
+      overflow-x: auto;
+      padding: 4px 20px 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 11px 12px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      background: var(--page);
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 11px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #eef0f1;
+      white-space: nowrap;
+    }
+
+    tbody tr:hover {
+      background: rgba(0, 114, 206, .04);
+    }
+
+    .rank {
+      display: inline-grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      background: var(--steel);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .rank.top {
+      background: var(--orange);
+    }
+
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    footer {
+      padding: 20px 32px 30px;
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 11.5px;
+      border-top: 1px solid var(--line);
+      margin-top: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (max-width:1100px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width:640px) {
+
+      header.app-header,
+      .shell,
+      .hero {
+        margin-left: 14px;
+        margin-right: 14px;
+      }
+
+      .hero {
+        margin-left: 14px;
+        margin-right: 14px;
+      }
+
+      .shell {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .active-scope {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topline"></div>
+
+  <header class="app-header">
+    <div class="brand-mark">
+      <div class="title">Panel Ejecutivo<small>Ventas comerciales — datos consolidados</small></div>
+    </div>
+    <div class="header-actions">
+      <span class="pill-date" id="lastUpdate">Actualizado: —</span>
+    </div>
+    <div class="brand-logo">
+      <svg viewBox="0 0 1183 487" xmlns="http://www.w3.org/2000/svg" aria-label="ArcelorMittal">
+        <path
+          d="M801.62 4.59c8.81-2.96 18.11-4.37 27.4-4.52 17.67-.14 35.32 2.22 52.5 6.33 28.94 6.38 56.87 16.64 84.15 28.1 56.95 24.58 111.27 55.2 162.23 90.52 13.81 9.82 27.6 19.72 40.45 30.78 5.65 5.38 11.34 11.34 13.38 19.11 1.48 7.76-1.16 16.39-7.27 21.54-5.81 5.72-14.72 7.25-22.47 5.52-7.68-1.06-14.36-5.2-21.15-8.63-28.49-14.12-57.98-26.27-88.37-35.64-13.47-4.37-27.19-7.89-40.9-11.39-33.67-7.63-68.01-12.72-102.54-13.76-14.91-.96-29.89-.33-44.74 1.22 19.83 31.22 42.24 60.71 65.68 89.29 4.85 5.63 6.47 14.03 3.48 20.91-4.66 10-16.93 15.93-27.58 12.43-5.04-1.5-8.43-5.72-11.96-9.32-9.33-11.04-18.45-22.28-27-33.94-11.61-14.8-22.25-30.33-32.98-45.78-5.72-8.84-12.06-17.32-16.96-26.65-54.54 10.23-106.5 31.44-155.09 57.87-16.33 9.18-32.54 18.62-47.99 29.25-11.04 7.13-21.2 15.49-31.87 23.14-4.89 3.84-11.52 4.56-17.52 3.81-7.88-2.22-15.16-8.19-16.87-16.48-1.39-4.44-.62-9.24 1.14-13.46 2.12-4 5.43-7.22 8.87-10.11 28.76-23.86 60.32-44.23 93.34-61.67 66.06-34.29 138.4-58.32 213-62.96 16.96-.04 33.97-.68 50.89.76 34.46 2.23 68.62 8.18 102.03 16.81 27.59 7.48 54.44 17.43 80.97 28.01-36.28-21.09-73.42-40.87-112.15-57.13-26.46-11.34-53.68-21.02-81.62-28.01-18.7-4.44-37.86-7.69-57.14-6.92-3.35.16-6.62.92-9.84 1.75-3.36.81-5.82 3.37-8.6 5.21-3.83 4.87-3.3 11.65-1.64 17.25 1.56 4.53 3.63 8.89 6.05 13.03.74 1.1.79 2.44 1 3.72-14.54 1.08-28.88 4-43.08 7.16-5.11-10.34-9.95-21.15-10.85-32.79-.51-8.89-.74-18.1 2.43-26.56 4.41-13.33 16.07-23.44 29.19-27.8z"
+          fill="#ff3700" />
+        <path
+          d="M50.96 347.89c4.99-4.18 13.31-3.4 17.45 1.62 2.8 3.59 4.2 7.98 5.75 12.2 13.67 36.69 27.33 73.38 40.98 110.07 1.29 3.67 3.29 8.28.33 11.73-3.32 3.18-9.26 3.88-12.86.78-2.29-2.33-3.09-5.62-4.23-8.58-3.32-9.56-6.9-19.02-10.14-28.6-15.43-.24-30.85-.05-46.28-.11-4.31.07-8.65-.25-12.93.38-3.34 11.23-7.74 22.14-11.64 33.2-1.91 6.47-11.54 7.69-15.4 2.44-2.52-3.49-.66-7.92.59-11.53 14.38-38.34 28.66-76.71 43.02-115.05l5.36-8.55zm7.78 16.26l-23.76 67.63c15.4 0 30.79.01 46.19.01 1.6.51 1.23-1.06.88-1.83-7.73-21.95-15.8-43.79-23.31-65.81zm323.79-18.41c3.46-1.19 7.81-.46 10.05 2.65 1.9 2.04 1.7 4.99 1.81 7.58-.03 40.33.02 80.66-.03 121 .16 3.43-1.32 7.3-4.69 8.68-3.46 1.22-7.9.93-10.43-2.01-1.9-2.05-2.14-5-2.18-7.65.01-40.34-.01-80.68.01-121.01-.11-3.75 1.51-8.14 5.46-9.24zm220.86 2.77c3.44-3.5 8.97-3.95 13.47-2.52 4.45 1.53 7.43 5.7 8.69 10.08 6.23 21.89 12.53 43.76 18.73 65.66 3.61 12.02 6.88 24.14 9.85 36.34 4.21-18.8 10.12-37.15 15.3-55.69 4.24-14.98 8.59-29.93 12.85-44.9.96-3.32 2.16-6.83 4.9-9.12 4.96-4.67 13.97-4.15 18.15 1.32 2.49 3.43 3.42 7.69 3.98 11.83 6.12 37.18 12.43 74.32 18.58 111.49.31 3.56 1.28 7.83-1.32 10.8-2.42 3.02-6.94 2.84-10.26 1.71-3.41-1.39-4.14-5.46-4.82-8.65-5.6-36.33-11.75-72.58-16.95-108.96-1.86 10.12-5 19.94-7.75 29.85-8.07 27.36-15.85 54.82-23.98 82.17-1.57 6.86-11.01 8.45-15.81 4.06-1.42-1.54-1.98-3.62-2.61-5.55-5.31-18.17-10.55-36.36-15.88-54.52-5.07-18.64-11.48-36.93-15.36-55.87-5.08 35.76-11.25 71.36-16.7 107.06-.58 3.72-1.2 8.15-4.78 10.23-3.53 1.51-8.66 1.6-10.97-1.99-2.15-2.98-1.38-6.87-.95-10.24 6.37-38.1 12.7-76.2 19.06-114.29.72-3.7 1.8-7.59 4.58-10.3zm410.94-2.95c5.47-1.97 11.69 2.5 11.25 8.37.1 40.33-.01 80.67.06 121.01-.09 2.93.13 6.37-2.13 8.63-3.65 4.35-11.99 3.55-14.26-1.84-.89-1.77-.91-3.79-.95-5.71-.01-39.68.02-79.37-.01-119.06-.37-4.49.85-10.39 6.04-11.4zm-258.22 4.65c6.53-1.9 13.88 3.9 13.12 10.74.02 6.76-7.59 11.79-13.84 9.48-6.05-1.72-9.1-9.45-5.99-14.88 1.29-2.67 3.98-4.4 6.71-5.34zm41.48 6.48c.69-6.39 9.12-8.7 13.87-5.14 2.68 1.87 3.28 5.4 3.25 8.46-.01 7.12-.05 14.24.02 21.36 3.93-.01 8.04-.3 11.8 1.09 5.39 2.47 4.78 11.36-.72 13.37-3.65.95-7.47.47-11.19.68.11 27.15.13 54.3 0 81.45.26 5.99-6.17 9.89-11.59 8.05-3.79-1.17-5.86-5.21-5.64-9.01-.02-26.82-.05-53.64.03-80.46-3.73-.31-7.6.25-11.2-.95-4.81-2.55-5.04-10.89.07-13.25 3.57-1.19 7.4-.97 11.12-.99.09-8.21-.35-16.46.18-24.66zm54.44.31c.45-6.92 10.29-9.48 14.68-4.63 2.41 2.57 2.43 6.28 2.36 9.59-.05 6.48-.02 12.96.04 19.45 4.14-.02 8.52-.4 12.45 1.22 4.28 2.75 4.24 10.33-.37 12.72-3.81 1.67-8.07.95-12.09 1.09-.15 26.87.01 53.74-.08 80.61-.01 2.4-.6 4.92-2.12 6.82-3.9 3.75-11.5 3.32-14.08-1.77-1.37-3.19-.93-6.76-1-10.13-.01-25.17.08-50.34-.04-75.51-4.4-.24-9.5.89-13.08-2.38-2.69-2.91-1.97-7.33-.17-10.51 3.91-2.61 8.77-2.15 13.25-2.19.24-8.13-.25-16.28.25-24.38zm-718.75 31.16c-.14-7.98 11.8-10.75 15.73-4.24 2.44 4.51 1.06 9.95 1.53 14.87 3.17-6.2 7.99-11.57 13.87-15.3 4.2-2.56 9.54-4.16 14.33-2.38 5.15 2.16 5.84 9.88 1.86 13.44-2.57 2.63-6.32 3.28-9.64 4.48-6.21 2-12.28 5.4-15.96 10.96-3.39 5.3-4.41 11.74-4.44 17.94-.03 16.02 0 32.04-.01 48.07-.02 3.05-.37 6.61-3.08 8.55-5.13 4.37-14.52.62-14.21-6.48-.11-29.97-.15-59.94.02-89.91zm93.26-7.52c7.53-.66 15.31-.22 22.49 2.33 3.66 1.39 7.31 3.33 9.73 6.5 2.97 3.9.16 10.51-4.78 10.92-4.02.33-7.56-1.94-11.24-3.15-8.8-3.19-19.42-2.36-26.89 3.58-6.98 5.31-10.66 13.82-12.26 22.23-1.41 8.59-1.25 17.56 1.27 25.94 2.28 7.46 6.77 14.49 13.51 18.65 6.29 3.75 14 4.2 21.08 2.97 4.37-.75 8.15-3.3 12.42-4.36 3.29-.85 7.66.95 8.1 4.65.8 3.23-.84 6.6-3.49 8.44-7.62 5.42-17.24 7.31-26.46 6.94-12.4-.32-24.99-5.63-32.78-15.48-9.15-10.98-12.35-25.76-11.88-39.77.29-13.8 4.79-28.02 14.68-37.97 6.98-7.14 16.6-11.42 26.5-12.42zm299.84-.05c3.76-.97 8.36.43 9.99 4.19 1.68 4.44.64 9.31.93 13.92 5.08-8.87 13.56-18.29 24.73-18.35 5.27-.24 9.23 5.19 7.76 10.18-.96 4.73-5.92 6.52-9.95 7.88-7.03 2.06-14.31 5.49-18.23 11.98-3.51 5.5-4.25 12.19-4.29 18.57-.01 15.69-.01 31.37.01 47.05-.12 2.31-.07 4.88-1.48 6.85-2.92 4.41-10.06 4.61-13.62.92-1.95-2.07-2.18-5.06-2.24-7.74.03-28.68.01-57.37.02-86.06-.23-4.08 1.92-8.76 6.37-9.39zm230-.08c3.02-.38 6.69-.28 8.73 2.37 2.12 2.14 2.33 5.29 2.34 8.14-.06 28.66.01 57.32-.04 85.99.15 3.44-1.35 7.17-4.7 8.57-3.4 1.27-8.03 1.15-10.4-1.96-1.99-2.02-2.18-5.01-2.24-7.67v-79c.02-3.32-.2-6.66.27-9.95.45-3.15 2.94-5.82 6.04-6.49zm213.51 1.43c3.14-2.34 7.96-2.13 11.13.12 2.14 2.01 3.12 5.02 3 7.92-.06 29.01.01 58.02-.03 87.04 0 3.21-1.19 6.92-4.33 8.33-4.09 2.1-10.35.93-12.06-3.73-1.46-3.75-.74-7.85-.93-11.76-3.64 5.28-8.13 10.04-13.95 12.91-11.92 5.93-26.72 4.3-37.88-2.62-11.78-7.42-18.68-20.69-20.96-34.14-2.04-12.54-1.25-25.78 3.46-37.66 4.24-10.79 12.42-20.3 23.26-24.77 10.01-4.11 21.9-4.72 31.77.12 5.92 2.92 10.76 7.72 14.26 13.28.37-5.04-1.2-11.35 3.26-15.04zm-37.7 14.26c-6.65 1.67-12.45 6.19-15.9 12.08-5.22 8.56-6.41 18.91-6.02 28.75.62 9.59 3.25 19.66 10.15 26.7 7.15 7.68 19.32 9.62 28.76 5.31 5.21-2.33 9.29-6.68 12.13-11.56 5.27-9.82 6.36-21.41 5.02-32.33-1.17-8.17-3.9-16.6-10.04-22.41-6.09-6.25-15.69-8.87-24.1-6.54zm-648.11-4.17c8.98-8.45 21.64-12.65 33.89-11.53 10.64.62 20.77 5.84 27.81 13.78 9.15 10.22 13.68 24.18 13.23 37.81-.11 2.7-1.25 5.88-4 6.89-3.8 1.58-8.04.88-12.04 1.02-19.25.08-38.51-.18-57.76.15.48 7.54 2.58 15.26 7.62 21.08 5.17 6.22 13.21 9.84 21.26 9.93 7.35.15 15-.92 21.37-4.81 3.81-2.08 7.25-4.98 11.45-6.28 3.29-.65 7.47 1.31 8.04 4.87 1.42 4.84-2.59 9-6.22 11.57-11.97 8.54-27.47 11.05-41.86 9.21-11.8-1.47-22.85-8.21-29.41-18.14-8.4-12.37-10.76-28.05-9-42.69 1.45-12.26 6.69-24.21 15.62-32.86zm8.57 13.54c-4.94 5.98-6.9 13.8-7.38 21.4 18.85-.02 37.7.18 56.55-.1-.34-8.79-3.01-17.93-9.34-24.3-10.71-10.82-30.79-9.16-39.83 3zm152.82-23.85c11.43-2.76 24.08-1.62 34.3 4.45 10.41 6.06 17.4 16.83 20.62 28.26 3.71 13.64 3.4 28.41-1.22 41.8-3.61 9.67-9.91 18.66-18.9 23.98-10.78 6.52-24.34 7.8-36.35 4.29-11.66-3.3-21.4-12.1-26.45-23.05-7.04-14.97-7.65-32.59-3.09-48.37 4.28-14.72 15.84-27.76 31.09-31.36zm4.73 14.6c-6.54 1.78-12.09 6.4-15.42 12.26-5.29 9.18-6.43 20.15-5.62 30.55.81 8.69 3.39 17.68 9.51 24.17 7.53 8.2 20.82 10.41 30.54 4.91 6.09-3.13 10.37-8.94 12.9-15.18 3.76-10.24 4.28-21.56 2.11-32.2-1.69-7.96-5.51-15.81-12.18-20.72-6.19-4.57-14.48-5.78-21.84-3.79z"
+          fill="#414141" />
+      </svg>
+
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Resumen comercial</p>
+      <h1>Ventas por zona y desempeño de producto</h1>
+      <p>Vista consolidada de ventas, participación regional y ranking de productos, con filtros dinámicos por localidad
+        y período.</p>
+    </div>
+  </section>
+
+  <main class="shell">
+
+    <div class="toolbar">
+      <div class="filters">
+        <div class="field">
+          <label for="fLocalidad">Localidad</label>
+          <select id="fLocalidad"></select>
+        </div>
+        <div class="field">
+          <label for="fPeriodo">Período</label>
+          <select id="fPeriodo">
+            <option value="todos">Todo el año</option>
+            <option value="q1">Q1</option>
+            <option value="q2">Q2</option>
+            <option value="q3">Q3</option>
+            <option value="q4">Q4</option>
+          </select>
+        </div>
+        <button class="btn-reset" id="btnReset" type="button">Restablecer filtros</button>
+      </div>
+      <div class="active-scope">
+        Vista activa
+        <strong id="scopeLabel">Todas las localidades <span class="accent">·</span> Todo el año</strong>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi grad">
+        <div class="label">Ventas totales</div>
+        <div class="value" id="kpiTotal">—</div>
+        <div class="delta up" id="kpiTotalDelta">—</div>
+      </div>
+      <div class="kpi sky">
+        <div class="label">Localidades activas</div>
+        <div class="value" id="kpiLocalidades">—</div>
+        <div class="delta">Con ventas registradas</div>
+      </div>
+      <div class="kpi steel">
+        <div class="label">Promedio por localidad</div>
+        <div class="value" id="kpiPromedio">—</div>
+        <div class="delta">Sobre la selección activa</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Líder de ventas</div>
+        <div class="value" id="kpiLider">—</div>
+        <div class="delta" id="kpiLiderDetail">—</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="resumen">Resumen</button>
+      <button class="tab-btn" data-tab="productos">Productos</button>
+      <button class="tab-btn" data-tab="detalle">Detalle por localidad</button>
+    </div>
+
+    <!-- TAB: RESUMEN -->
+    <div class="tab-panel active" id="tab-resumen">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3>Ventas por localidad</h3>
+              <p>Comparativa ordenada de mayor a menor.</p>
+            </div>
+            <span class="badge orange">Barras</span>
+          </div>
+          <div class="chart tall" id="chartBarras"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3>Participación por localidad</h3>
+              <p>Distribución porcentual sobre el total.</p>
+            </div>
+            <span class="badge">Dona</span>
+          </div>
+          <div class="chart tall" id="chartDona"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Tendencia trimestral</h3>
+            <p>Evolución de ventas por trimestre para las localidades seleccionadas.</p>
+          </div>
+          <span class="badge">Área</span>
+        </div>
+        <div class="chart" id="chartArea"></div>
+      </div>
+    </div>
+
+    <!-- TAB: PRODUCTOS -->
+    <div class="tab-panel" id="tab-productos">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head">
+          <div>
+            <h3>Top 10 productos más vendidos</h3>
+            <p>Ranking global por cantidad vendida.</p>
+          </div>
+          <span class="badge orange">Top 10</span>
+        </div>
+        <div class="chart tall" id="chartProductos"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Detalle de productos</h3>
+            <p>Cantidad vendida por producto, con escala relativa.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Producto</th>
+                <th class="num">Cantidad</th>
+                <th>Escala</th>
+              </tr>
+            </thead>
+            <tbody id="tblProductos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: DETALLE -->
+    <div class="tab-panel" id="tab-detalle">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Resumen por localidad</h3>
+            <p>Detalle asociado al filtro activo.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Localidad</th>
+                <th class="num">Ventas</th>
+                <th>Participación</th>
+              </tr>
+            </thead>
+            <tbody id="tblLocalidades"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <span>Panel Ejecutivo · ArcelorMittal</span>
+    <span>Los indicadores se recalculan según la localidad y el período seleccionados.</span>
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* =========================================================
+         DATOS — reemplazar por el JSON provisto por @agent response.
+         Estructura esperada: localidadesBase[], productos[]
+      ========================================================== */
+      var localidadesBase = [
+        { localidad: "Santa Fe", q1: 24, q2: 26, q3: 23, q4: 25 },
+        { localidad: "Villa Constitución", q1: 19, q2: 20, q3: 20, q4: 20 },
+        { localidad: "Casilda", q1: 17, q2: 18, q3: 19, q4: 18 },
+        { localidad: "Rosario", q1: 13, q2: 14, q3: 14, q4: 14 },
+        { localidad: "Rufino", q1: 12, q2: 13, q3: 13, q4: 13 },
+        { localidad: "San Nicolás", q1: 10, q2: 11, q3: 12, q4: 11 }
+      ];
+      var productos = [
+        { producto: "41", cantidad: 231.54 }, { producto: "23", cantidad: 225.0 },
+        { producto: "4", cantidad: 213.05 }, { producto: "12", cantidad: 205.63 },
+        { producto: "21", cantidad: 205.0 }, { producto: "3", cantidad: 193.7 },
+        { producto: "39", cantidad: 189.5 }, { producto: "2", cantidad: 181.72 },
+        { producto: "8", cantidad: 179.72 }, { producto: "43", cantidad: 172.29 }
+      ];
+
+      var palette = {
+        purple: "#460a78", violet: "#be2878", red: "#e63c41", orange: "#f58746", yellow: "#ffbe6e",
+        tint: function (hex, pct) {
+          var n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+          var mix = function (c) { return Math.round(c + (255 - c) * (1 - pct)); };
+          return "rgb(" + mix(r) + "," + mix(g) + "," + mix(b) + ")";
+        }
+      };
+
+      var intFmt = new Intl.NumberFormat("es-AR");
+      var decFmt = new Intl.NumberFormat("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      function totalOf(row, periodo) {
+        if (periodo === "todos") return row.q1 + row.q2 + row.q3 + row.q4;
+        return row[periodo];
+      }
+
+      /* ---------- Filtros ---------- */
+      var selLocalidad = document.getElementById("fLocalidad");
+      var selPeriodo = document.getElementById("fPeriodo");
+      var btnReset = document.getElementById("btnReset");
+      var scopeLabel = document.getElementById("scopeLabel");
+
+      var optTodas = document.createElement("option");
+      optTodas.value = "Todas"; optTodas.textContent = "Todas las localidades";
+      selLocalidad.appendChild(optTodas);
+      localidadesBase.forEach(function (r) {
+        var o = document.createElement("option");
+        o.value = r.localidad; o.textContent = r.localidad;
+        selLocalidad.appendChild(o);
+      });
+
+      /* ---------- Charts ---------- */
+      var chBarras = echarts.init(document.getElementById("chartBarras"));
+      var chDona = echarts.init(document.getElementById("chartDona"));
+      var chArea = echarts.init(document.getElementById("chartArea"));
+      var chProductos = echarts.init(document.getElementById("chartProductos"));
+
+      function baseGrid() {
+        return { left: 14, right: 18, top: 16, bottom: 34, containLabel: true };
+      }
+
+      function renderBarras(rows) {
+        var sorted = rows.slice().sort(function (a, b) { return b.total - a.total; });
+        chBarras.setOption({
+          grid: baseGrid(),
+          tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+          xAxis: {
+            type: "category", data: sorted.map(function (r) { return r.localidad; }),
+            axisLine: { lineStyle: { color: "#e3e5e7" } }, axisLabel: { color: "#7a7d80", fontSize: 11, interval: 0, rotate: sorted.length > 5 ? 20 : 0 }
+          },
+          yAxis: { type: "value", splitLine: { lineStyle: { color: "#f0f1f2" } }, axisLabel: { color: "#7a7d80" } },
+          series: [{
+            type: "bar", data: sorted.map(function (r) { return r.total; }),
+            barMaxWidth: 42, itemStyle: {
+              borderRadius: [6, 6, 0, 0],
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: palette.orange },
+                { offset: 1, color: palette.violet }
+              ])
+            },
+            label: { show: true, position: "top", color: "#414141", fontWeight: 600, fontSize: 11 }
+          }]
+        }, true);
+      }
+
+      function renderDona(rows) {
+        var colors = [palette.purple, palette.violet, palette.red, palette.orange, palette.yellow,
+        palette.tint(palette.purple, .6)];
+        chDona.setOption({
+          tooltip: { trigger: "item", formatter: "{b}: {c} ({d}%)" },
+          legend: { bottom: 0, left: "center", textStyle: { color: "#414141", fontSize: 11 }, itemWidth: 10, itemHeight: 10 },
+          series: [{
+            type: "pie", radius: ["48%", "72%"], center: ["50%", "44%"],
+            avoidLabelOverlap: true,
+            itemStyle: { borderColor: "#fff", borderWidth: 2 },
+            label: { show: true, formatter: "{d}%", color: "#414141", fontSize: 11, fontWeight: 600 },
+            data: rows.map(function (r, i) { return { name: r.localidad, value: r.total, itemStyle: { color: colors[i % colors.length] } }; })
+          }]
+        }, true);
+      }
+
+      function renderArea(rows) {
+        var quarters = ["Q1", "Q2", "Q3", "Q4"];
+        var top = rows.slice().sort(function (a, b) { return b.total - a.total; }).slice(0, 4);
+        var seriesColors = [palette.purple, palette.violet, palette.red, palette.orange];
+        chArea.setOption({
+          grid: baseGrid(),
+          tooltip: { trigger: "axis" },
+          legend: { top: 0, right: 0, textStyle: { color: "#414141", fontSize: 11 } },
+          xAxis: { type: "category", data: quarters, axisLine: { lineStyle: { color: "#e3e5e7" } }, axisLabel: { color: "#7a7d80" } },
+          yAxis: { type: "value", splitLine: { lineStyle: { color: "#f0f1f2" } }, axisLabel: { color: "#7a7d80" } },
+          series: top.map(function (r, i) {
+            return {
+              name: r.localidad, type: "line", smooth: true, symbol: "circle", symbolSize: 6,
+              data: [r.q1, r.q2, r.q3, r.q4],
+              lineStyle: { width: 2.5, color: seriesColors[i] },
+              itemStyle: { color: seriesColors[i] },
+              areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: palette.tint(seriesColors[i], .55) },
+                  { offset: 1, color: palette.tint(seriesColors[i], .05) }
+                ])
+              }
+            };
+          })
+        }, true);
+      }
+
+      function renderProductos() {
+        var sorted = productos.slice().sort(function (a, b) { return a.cantidad - b.cantidad; });
+        chProductos.setOption({
+          grid: { left: 60, right: 40, top: 10, bottom: 10, containLabel: true },
+          tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+          xAxis: { type: "value", splitLine: { lineStyle: { color: "#f0f1f2" } }, axisLabel: { color: "#7a7d80" } },
+          yAxis: {
+            type: "category", data: sorted.map(function (p) { return "Producto " + p.producto; }),
+            axisLine: { lineStyle: { color: "#e3e5e7" } }, axisLabel: { color: "#7a7d80", fontSize: 11 }
+          },
+          series: [{
+            type: "bar", data: sorted.map(function (p) { return p.cantidad; }),
+            barMaxWidth: 16,
+            itemStyle: {
+              borderRadius: [0, 6, 6, 0],
+              color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                { offset: 0, color: palette.tint(palette.orange, .4) },
+                { offset: 1, color: palette.orange }
+              ])
+            },
+            label: {
+              show: true, position: "right", color: "#414141", fontSize: 11, fontWeight: 600,
+              formatter: function (p) { return decFmt.format(p.value); }
+            }
+          }]
+        }, true);
+      }
+
+      function renderTablaProductos() {
+        var sorted = productos.slice().sort(function (a, b) { return b.cantidad - a.cantidad; });
+        var max = sorted[0].cantidad;
+        var tbody = document.getElementById("tblProductos");
+        tbody.innerHTML = sorted.map(function (p, i) {
+          var pct = Math.round((p.cantidad / max) * 100);
+          return "<tr>" +
+            "<td><span class='rank" + (i < 3 ? " top" : "") + "'>" + (i + 1) + "</span></td>" +
+            "<td>Producto " + p.producto + "</td>" +
+            "<td class='num'>" + decFmt.format(p.cantidad) + "</td>" +
+            "<td><div style='width:110px;height:6px;background:#eceeef;border-radius:99px;overflow:hidden;'>" +
+            "<div style='width:" + pct + "%;height:100%;background:linear-gradient(90deg,#e63c41,#f58746);'></div></div></td>" +
+            "</tr>";
+        }).join("");
+      }
+
+      function renderTablaLocalidades(rows) {
+        var sorted = rows.slice().sort(function (a, b) { return b.total - a.total; });
+        var totalGeneral = sorted.reduce(function (s, r) { return s + r.total; }, 0) || 1;
+        var tbody = document.getElementById("tblLocalidades");
+        tbody.innerHTML = sorted.map(function (r, i) {
+          var pct = ((r.total / totalGeneral) * 100).toFixed(1);
+          return "<tr>" +
+            "<td><span class='rank" + (i === 0 ? " top" : "") + "'>" + (i + 1) + "</span></td>" +
+            "<td>" + r.localidad + "</td>" +
+            "<td class='num'>" + intFmt.format(r.total) + "</td>" +
+            "<td>" + pct + "%</td>" +
+            "</tr>";
+        }).join("");
+      }
+
+      /* ---------- Orquestación de filtros / KPIs ---------- */
+      function currentRows() {
+        var loc = selLocalidad.value, per = selPeriodo.value;
+
+        var base = loc === "Todas"
+          ? localidadesBase
+          : localidadesBase.filter(function (r) {
+            return r.localidad === loc;
+          });
+
+        return base.map(function (r) {
+          return {
+            localidad: r.localidad,
+            q1: r.q1,
+            q2: r.q2,
+            q3: r.q3,
+            q4: r.q4,
+            total: totalOf(r, per)
+          };
+        });
+      }
+
+      function refresh() {
+        var rows = currentRows();
+        var total = rows.reduce(function (s, r) { return s + r.total; }, 0);
+        var lider = rows.slice().sort(function (a, b) { return b.total - a.total; })[0] || { localidad: "—", total: 0 };
+        var promedio = rows.length ? total / rows.length : 0;
+
+        document.getElementById("kpiTotal").textContent = intFmt.format(total);
+        document.getElementById("kpiTotalDelta").textContent = selPeriodo.value === "todos" ? "Acumulado anual" : "Trimestre " + selPeriodo.value.toUpperCase();
+        document.getElementById("kpiLocalidades").textContent = rows.length;
+        document.getElementById("kpiPromedio").textContent = decFmt.format(promedio);
+        document.getElementById("kpiLider").textContent = lider.localidad;
+        document.getElementById("kpiLiderDetail").textContent = intFmt.format(lider.total) + " unidades";
+
+        var locTxt = selLocalidad.value === "Todas" ? "Todas las localidades" : selLocalidad.value;
+        var perTxt = selPeriodo.value === "todos" ? "Todo el año" : "Trimestre " + selPeriodo.value.toUpperCase();
+        scopeLabel.innerHTML = locTxt + " <span class='accent'>·</span> " + perTxt;
+
+        renderBarras(rows);
+        renderDona(rows);
+        renderArea(rows);
+        renderTablaLocalidades(rows);
+
+        document.getElementById("lastUpdate").textContent = "Actualizado: " + new Date().toLocaleDateString("es-AR");
+      }
+
+      selLocalidad.addEventListener("change", refresh);
+      selPeriodo.addEventListener("change", refresh);
+      btnReset.addEventListener("click", function () {
+        selLocalidad.value = "Todas"; selPeriodo.value = "todos"; refresh();
+      });
+
+      /* ---------- Tabs ---------- */
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+          document.querySelectorAll(".tab-panel").forEach(function (p) { p.classList.remove("active"); });
+          btn.classList.add("active");
+          document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+          window.dispatchEvent(new Event("resize"));
+        });
+      });
+
+      window.addEventListener("resize", function () {
+        [chBarras, chDona, chArea, chProductos].forEach(function (c) { c.resize(); });
+      });
+
+      renderProductos();
+      renderTablaProductos();
+      refresh();
+    })();
+  </script>
+</body>
+
+</html>
